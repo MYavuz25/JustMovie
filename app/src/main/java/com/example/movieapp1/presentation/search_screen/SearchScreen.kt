@@ -1,73 +1,128 @@
 package com.example.movieapp1.presentation.search_screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.room.util.query
-import com.example.movieapp1.R
 import com.example.movieapp1.domain.model.Movies
-import com.example.movieapp1.presentation.popular_movies.MainScreenViewModel
 import com.example.movieapp1.presentation.popular_movies.view.MovieListRow
+import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     paddingValues: PaddingValues,
     navController: NavController,
     viewModel : SearchScreenViewModel = hiltViewModel()
 ) {
-    var query by remember { mutableStateOf("") }
     val state = viewModel.state.value
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var isGenreExpanded by remember { mutableStateOf(false) }
+    var isLanguageExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(false) }
+    val selectedGenres = remember { mutableStateListOf<String>() }
+    val selectedLanguages = remember { mutableStateListOf<String>() }
+
+    val genres = arrayListOf(
+        "Action",
+        "Adventure",
+        "Animation",
+        "Comedy",
+        "Crime",
+        "Documentary",
+        "Drama",
+        "Family",
+        "Fantasy",
+        "History",
+        "Horror",
+        "Music",
+        "Mystery",
+        "Romance",
+        "Science Fiction",
+        "TV Movie",
+        "Thriller",
+        "War",
+        "Western"
+    )
+    val languages = arrayListOf(
+        "English",
+        "France",
+        "German",
+        "Turkish"
+    )
+
 
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(paddingValues)
         .background(Color.Black)) {
-        Column() {
-            MovieSearchBar(modifier = Modifier
-                .fillMaxWidth(),
-                hint = "Star Wars",
-                onSearch = {
-                    viewModel.onEvent(SearchScreenEvent.Search(it))
-                },
+        Column {
+            Row{
+                MovieSearchBar(//modifier = Modifier
+                    //.fillMaxWidth(),
+                    hint = "Star Wars",
+                    onSearch = {
+                        viewModel.onEvent(SearchScreenEvent.Search(it))
+                    },
+                    onFilterClick = {
+                        showBottomSheet=true
+                    }
+                    )
 
-            )
+            }
+
 
             MovieSection(
                 title = "arama sonuçları",
@@ -77,6 +132,132 @@ fun SearchScreen(
                     navController.navigate("movie_detail_screen/${it.id}")
                 }
             )
+
+
+
+
+            Scaffold(
+            ) { contentPadding ->
+                // Screen content
+                Box(modifier = Modifier.padding(contentPadding)) {
+                    // Burada ana ekran içeriğinizi yerleştirin.
+                }
+
+                if (showBottomSheet) {
+                    ModalBottomSheet(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        onDismissRequest = {
+                            showBottomSheet = false
+                        },
+                        sheetState = sheetState
+                    ) {
+                        // Sheet content
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Card(modifier = Modifier.clickable {isGenreExpanded = !isGenreExpanded  }) {
+                                Row {
+                                    Text("Genre")
+                                    if (isExpanded){
+                                        Icon(imageVector = Icons.Filled.ArrowDropUp, contentDescription ="" )
+                                    }else{
+                                        Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription ="" )
+                                    }
+                                }
+
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (isGenreExpanded) {
+                                FlowRow(
+                                    mainAxisSpacing = 8.dp,
+                                    crossAxisSpacing = 8.dp
+                                ) {
+                                    genres.forEach { genre ->
+                                        FilterChip(
+                                            selected = selectedGenres.contains(genre),
+                                            onClick = { selectedGenres.add(genre) },
+                                            label = { Text(genre) }
+                                        )
+                                    }
+                                }
+                            }
+
+                            Card(modifier = Modifier.clickable {isLanguageExpanded = !isLanguageExpanded  }) {
+                                Row {
+                                    Text("Language")
+                                    if (isLanguageExpanded){
+                                        Icon(imageVector = Icons.Filled.ArrowDropUp, contentDescription ="" )
+                                    }else{
+                                        Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription ="" )
+                                    }
+                                }
+
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (isLanguageExpanded) {
+                                FlowRow(
+                                    mainAxisSpacing = 8.dp,
+                                    crossAxisSpacing = 8.dp
+                                ) {
+                                    languages.forEach { language ->
+                                        FilterChip(
+                                            selected = selectedLanguages.contains(language),
+                                            onClick = { selectedLanguages.add(language) },
+                                            label = { Text(language) }
+                                        )
+                                    }
+                                }
+                            }
+                            Card(modifier = Modifier.clickable {isExpanded = !isExpanded  }) {
+                                Row {
+                                    Text("Rating")
+                                    if (isExpanded){
+                                        Icon(imageVector = Icons.Filled.ArrowDropUp, contentDescription ="" )
+                                    }else{
+                                        Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription ="" )
+                                    }
+                                }
+
+                            }
+                        }
+
+
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Button(onClick = {
+                                selectedGenres.clear()
+                                selectedLanguages.clear()
+                                //Diğer Tüm filtreleri sil
+
+                                 }) {
+                                Text("Clear all")
+                            }
+                            Button(onClick = {
+
+                                //Filtreleri uygula
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        showBottomSheet = false
+                                    }
+                                }}) {
+                                Text("Apply")
+                            }
+                        }
+                    }
+                }
+            }
+
+
         }
     }
 }
@@ -118,6 +299,7 @@ fun MovieSearchBar(
     modifier: Modifier = Modifier,
     hint: String = "",
     onSearch: (String) -> Unit = {},
+    onFilterClick: () -> Unit = {},
     viewModel : SearchScreenViewModel = hiltViewModel()
 ) {
     var text by remember {
@@ -128,52 +310,63 @@ fun MovieSearchBar(
     }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-
-    Box(
+    Row(
         modifier = modifier
-            .fillMaxWidth()
             .shadow(5.dp, CircleShape)
             .background(Color.White, CircleShape)
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = {
-                text=it
-                viewModel.onEvent(SearchScreenEvent.Search(text))
-            },
-            leadingIcon = {
-                Icon(Icons.Filled.Search, contentDescription = "Search")
-            },
-            maxLines = 1,
-            singleLine = true,
-            textStyle = TextStyle(color = Color.Black),
-            shape = CircleShape,
-            keyboardActions = KeyboardActions(onDone = {
-                onSearch(text)
-                keyboardController?.hide()
-
-            }),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent
-            ),
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .onFocusChanged {
-                    isHintDisplayed = it.isFocused != true && text.isEmpty()
-                }
-        )
-        if (isHintDisplayed) {
-            Text(
-                text = hint,
-                color = Color.LightGray,
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = {
+                    text = it
+                    viewModel.onEvent(SearchScreenEvent.Search(text))
+                },
+                leadingIcon = {
+                    Icon(Icons.Filled.Search, contentDescription = "Search")
+                },
+                maxLines = 1,
+                singleLine = true,
+                textStyle = TextStyle(color = Color.Black),
+                shape = CircleShape,
+                keyboardActions = KeyboardActions(onDone = {
+                    onSearch(text)
+                    keyboardController?.hide()
+                }),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
+                ),
                 modifier = Modifier
-                    .padding(horizontal = 70.dp, vertical = 15.dp)
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        isHintDisplayed = it.isFocused != true && text.isEmpty()
+                    }
             )
+
+            if (isHintDisplayed) {
+                Text(
+                    text = hint,
+                    color = Color.LightGray,
+                    modifier = Modifier
+                        .padding(horizontal = 40.dp, vertical = 15.dp)
+                )
+            }
+        }
+
+        IconButton(
+            onClick = onFilterClick,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        ) {
+            Icon(imageVector = Icons.Filled.FilterAlt, contentDescription = "Filter")
         }
     }
 }
+
 
 

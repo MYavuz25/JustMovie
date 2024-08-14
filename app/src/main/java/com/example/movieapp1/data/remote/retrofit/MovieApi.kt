@@ -1,6 +1,5 @@
 package com.example.movieapp1.data.remote.retrofit
 
-import android.os.IBinder
 import com.example.movieapp1.data.remote.dto.movie_detail.MovieDetailDTO
 import com.example.movieapp1.data.remote.dto.movie_lists.MovieListDto
 import retrofit2.http.GET
@@ -39,6 +38,7 @@ interface MovieApi {
         @Query("language") language: String, // Dil parametresi
         @Query("with_genres") genreId: Int
     ):MovieListDto
+
     //https://api.themoviedb.org/3/trending/movie/day?api_key=API_KEY&language=tr
     @GET("trending/movie/day")
     suspend fun getTrendDayMovie(
