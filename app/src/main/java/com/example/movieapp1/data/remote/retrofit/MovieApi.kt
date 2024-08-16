@@ -65,6 +65,8 @@ interface MovieApi {
         @Query("release_date.gte") releaseDateGte: String, // En erken çıkış tarihi (örneğin, "2022-01-01")
         @Query("release_date.lte") releaseDateLte: String, // En geç çıkış tarihi (örneğin, "2023-12-31")
         @Query("sort_by") sortBy: String, // Sıralama parametresi (örneğin, "popularity.desc")
+        @Query("with_original_language") originalLanguage:String,
+        @Query("vote_count.gte") voteCount:Int=100
     ): MovieListDto
 
 }

@@ -25,10 +25,10 @@ class SearchScreenViewModel @Inject constructor(
     init {
         getSearchedMovies("Star Wars")
     }
-    fun getFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String
+    fun getFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String
     ){
         job?.cancel()
-        job=getFilteredMoviesUseCase.getFilteredMovies(sortBy, genreIds, minVote, maxVote, releaseDateGte, releaseDatelte).onEach {
+        job=getFilteredMoviesUseCase.getFilteredMovies(sortBy, genreIds, minVote, maxVote, releaseDateGte, releaseDatelte,originalLanguage).onEach {
             when(it){
                 is Resource.Error -> {
                     _state.value = _state.value.copy(error = it.message ?: "Error")
@@ -39,7 +39,6 @@ class SearchScreenViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
-                    println("başarılı")
                     _state.value = _state.value.copy(movies = it.data, isLoading = false)
                 }
             }
@@ -73,7 +72,8 @@ class SearchScreenViewModel @Inject constructor(
                     "${event.selectedSortOption}.desc",event.selectedGenres.toString(),
                     event.voteAverageRange.start,event.voteAverageRange.endInclusive,
                     event.releaseYearRange.start.toString()+"-01-01",
-                    event.releaseYearRange.endInclusive.toString()+"-12-31")
+                    event.releaseYearRange.endInclusive.toString()+"-12-31",
+                    event.originalLanguage)
             }
         }
     }

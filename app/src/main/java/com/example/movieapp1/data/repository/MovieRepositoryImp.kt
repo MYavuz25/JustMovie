@@ -33,8 +33,8 @@ class MovieRepositoryImp @Inject constructor(private val api: MovieApi): MovieRe
     override suspend fun getSearchingMovies(search:String): MovieListDto {
         return api.getSearchedMovies(API_KEY,language, searchString = search)
     }
-    override suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String
+    override suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String
     ): MovieListDto {
-        return api.getApplyFilteredMovies(API_KEY,language,genreIds,minVote,maxVote,releaseDateGte,releaseDatelte,sortBy)
+        return api.getApplyFilteredMovies(API_KEY,language,genreIds,minVote,maxVote,releaseDateGte,releaseDatelte,sortBy,originalLanguage)
     }
 }

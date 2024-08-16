@@ -7,6 +7,7 @@ sealed class SearchScreenEvent {
         val releaseYearRange: ClosedFloatingPointRange<Float>,
         val voteAverageRange: ClosedFloatingPointRange<Float>,
         val selectedSortOption: String,
-        val selectedLanguage: String
+        val selectedLanguage: String,
+        val originalLanguage:String
     ):SearchScreenEvent()
 }

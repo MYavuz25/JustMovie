@@ -80,37 +80,54 @@ fun SearchScreen(
     var isReleaseYearExpanded by remember { mutableStateOf(false) }
     var isVoteAverageExpanded by remember { mutableStateOf(false) }
     var isSortByExpanded by remember { mutableStateOf(false) }
-    val selectedGenres = remember { mutableStateListOf<String>() }
+    val selectedGenres = remember { mutableStateListOf<Int>() }
     var releaseYearSlider by remember { mutableStateOf(1900F..2024F)}
     var voteAverageSlider by remember { mutableStateOf(0F..10F)}
 
-    val genres = arrayListOf(
-        "12",
-        "28",
-        "Animation",
-        "Comedy",
-        "Crime",
-        "Documentary",
-        "Drama",
-        "Family",
-        "Fantasy",
-        "History",
-        "Horror",
-        "Music",
-        "Mystery",
-        "Romance",
-        "Science Fiction",
-        "TV Movie",
-        "Thriller",
-        "War",
-        "Western"
+    val genreMap = mapOf(
+        "Aksiyon" to 28,
+        "Macera" to 12,
+        "Animasyon" to 16,
+        "Komedi" to 35,
+        "Suç" to 80,
+        "Belgesel" to 99,
+        "Dram" to 18,
+        "Aile" to 10751,
+        "Fantastik" to 14,
+        "Tarih" to 36,
+        "Korku" to 27,
+        "Müzik" to 10402,
+        "Gizem" to 9648,
+        "Romantik" to 10749,
+        "Bilim-Kurgu" to 878,
+        "TV film" to 10770,
+        "Gerilim" to 53,
+        "Savaş" to 10752,
+        "Vahşi Batı" to 37
     )
-    val languages = arrayListOf(
-        "English",
-        "France",
-        "German",
-        "Turkish"
+    val languageMap = mapOf(
+        "İngilizce" to "en",
+        "İspanyolca" to "es",
+        "Fransızca" to "fr",
+        "Almanca" to "de",
+        "İtalyanca" to "it",
+        "Japonca" to "ja",
+        "Korece" to "ko",
+        "Çince" to "zh",
+        "Rusça" to "ru",
+        "Portekizce" to "pt",
+        "Arapça" to "ar",
+        "Hintçe" to "hi",
+        "Tayca" to "th",
+        "Türkçe" to "tr",
+        "Lehçe" to "pl",
+        "Flemenkçe" to "nl",
+        "İsveççe" to "sv",
+        "Danca" to "da",
+        "Norveççe" to "no",
+        "Fince" to "fi"
     )
+
     val sortOptions = listOf(
         "popularity",
         "primary_release_date",
@@ -118,7 +135,7 @@ fun SearchScreen(
         "original_title"
     )
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
-    var selectedLanguage by remember { mutableStateOf(languages[0]) }
+    var selectedLanguage by remember { mutableStateOf(languageMap.getValue("Türkçe")) }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -186,17 +203,17 @@ fun SearchScreen(
                                     mainAxisSpacing = 8.dp,
                                     crossAxisSpacing = 8.dp
                                 ) {
-                                    genres.forEach { genre ->
+                                    genreMap.forEach { genre ->
                                         FilterChip(
-                                            selected = selectedGenres.contains(genre),
+                                            selected = selectedGenres.contains(genre.value),
                                             onClick = {
-                                                if (selectedGenres.contains(genre)) {
-                                                    selectedGenres.remove(genre)
+                                                if (selectedGenres.contains(genre.value)) {
+                                                    selectedGenres.remove(genre.value)
                                                 } else {
-                                                    selectedGenres.add(genre)
+                                                    selectedGenres.add(genre.value)
                                                 }
                                             },
-                                            label = { Text(genre, color = Color.LightGray) }
+                                            label = { Text(genre.key, color = Color.LightGray) }
                                         )
                                     }
                                 }
@@ -211,17 +228,17 @@ fun SearchScreen(
                                     mainAxisSpacing = 8.dp,
                                     crossAxisSpacing = 8.dp
                                 ) {
-                                    languages.forEach { language ->
+                                    languageMap.forEach { language ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable { selectedLanguage = language }
+                                                .clickable { selectedLanguage = language.value }
                                                 .padding(vertical = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             RadioButton(
-                                                selected = selectedLanguage == language,
-                                                onClick = { selectedLanguage = language },
+                                                selected = selectedLanguage == language.value,
+                                                onClick = { selectedLanguage = language.value },
                                                 colors = RadioButtonDefaults.colors(
                                                     selectedColor = Color(
                                                         0xFFFFC107
@@ -229,7 +246,7 @@ fun SearchScreen(
                                                 )
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text(text = language, color = Color.White)
+                                            Text(text = language.key, color = Color.White)
                                         }
                                     }
                                 }
@@ -337,7 +354,7 @@ fun SearchScreen(
                             Button(onClick = {
                                 selectedSortOption=sortOptions[0]
                                 selectedGenres.clear()
-                                selectedLanguage=languages[0]
+                                selectedLanguage= languageMap["Türkçe"] ?:"tr"
                                 releaseYearSlider = 1900F..2024F
                                 voteAverageSlider=0F..10F
                             }) {
@@ -345,16 +362,20 @@ fun SearchScreen(
                             }
                             Button(onClick = {
                                 // Filtreleri uygula
-
+                                val selectedSort = when (selectedSortOption) {
+                                    "popularity", "release_date", "revenue", "primary_release_date", "vote_average", "vote_count" -> "$selectedSortOption.desc"
+                                    "original_title" -> "original_title.asc" // Alfabetik sıralama için asc kullanmak mantıklı
+                                    else -> selectedSortOption
+                                }
                                 viewModel.getFilteredMovies(
-                                    "$selectedSortOption.desc", // Sıralama kriteri (örneğin: "popularity" veya "release_date")
+                                    selectedSort, // Sıralama kriteri (örneğin: "popularity" veya "release_date")
                                     selectedGenres.joinToString(","), // Türleri virgülle ayırarak String formatında gönder
                                     voteAverageSlider.start, // Minimum oy ortalaması
                                     voteAverageSlider.endInclusive, // Maksimum oy ortalaması
                                     "${releaseYearSlider.start.toInt()}-01-01", // En erken çıkış tarihi
-                                    "${releaseYearSlider.endInclusive.toInt()}-12-31" // En geç çıkış tarihi
+                                    "${releaseYearSlider.endInclusive.toInt()}-12-31" ,// En geç çıkış tarihi
+                                    selectedLanguage
                                 )
-                                println(selectedSortOption)
 
 
                                 scope.launch { sheetState.hide() }.invokeOnCompletion {
