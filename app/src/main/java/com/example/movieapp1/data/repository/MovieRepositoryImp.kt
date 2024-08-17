@@ -9,7 +9,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 class MovieRepositoryImp @Inject constructor(private val api: MovieApi): MovieRepository {
-    val language=Locale.getDefault().language
+    private val language=Locale.getDefault().language
     override suspend fun getMovieDetail(movieId: Int): MovieDetailDTO {
         return api.getMovieDetail(movieId,API_KEY,language)
     }
@@ -33,8 +33,8 @@ class MovieRepositoryImp @Inject constructor(private val api: MovieApi): MovieRe
     override suspend fun getSearchingMovies(search:String): MovieListDto {
         return api.getSearchedMovies(API_KEY,language, searchString = search)
     }
-    override suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String
+    override suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String,voteCount:Int
     ): MovieListDto {
-        return api.getApplyFilteredMovies(API_KEY,language,genreIds,minVote,maxVote,releaseDateGte,releaseDatelte,sortBy,originalLanguage)
+        return api.getApplyFilteredMovies(API_KEY,language,genreIds,minVote,maxVote,releaseDateGte,releaseDatelte,sortBy,originalLanguage,voteCount)
     }
 }

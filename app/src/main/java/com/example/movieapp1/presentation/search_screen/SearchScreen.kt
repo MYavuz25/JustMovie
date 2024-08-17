@@ -41,6 +41,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -79,10 +80,12 @@ fun SearchScreen(
     var isLanguageExpanded by remember { mutableStateOf(false) }
     var isReleaseYearExpanded by remember { mutableStateOf(false) }
     var isVoteAverageExpanded by remember { mutableStateOf(false) }
+    var isVoteCountExpanded by remember { mutableStateOf(false) }
     var isSortByExpanded by remember { mutableStateOf(false) }
     val selectedGenres = remember { mutableStateListOf<Int>() }
     var releaseYearSlider by remember { mutableStateOf(1900F..2024F)}
     var voteAverageSlider by remember { mutableStateOf(0F..10F)}
+    var voteCountSlider by remember { mutableFloatStateOf(100F)}
 
     val genreMap = mapOf(
         "Aksiyon" to 28,
@@ -342,6 +345,34 @@ fun SearchScreen(
                                     }
                                 }
                             }
+                            MyCard(
+                                title = "Vote Count",
+                                isExpanded = isVoteCountExpanded,
+                                onExpandChange = { isVoteCountExpanded = !isVoteCountExpanded }
+                            ) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Slider(
+                                        value = voteCountSlider,
+                                        onValueChange = { newValue->
+                                            voteCountSlider = newValue },
+                                        valueRange = 0F..1000F,
+                                        steps = 10,
+                                        colors = SliderDefaults.colors(
+                                            thumbColor = Color(0xFFFFC107),
+                                            activeTrackColor = Color(0xFFFFC107)
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = ("+"+voteCountSlider.toInt()),
+                                        color = Color.White
+                                    )
+                                }
+                            }
                         }
 
 
@@ -357,6 +388,7 @@ fun SearchScreen(
                                 selectedLanguage= languageMap["Türkçe"] ?:"tr"
                                 releaseYearSlider = 1900F..2024F
                                 voteAverageSlider=0F..10F
+                                voteCountSlider=100F
                             }) {
                                 Text("Clear all")
                             }
@@ -374,7 +406,7 @@ fun SearchScreen(
                                     voteAverageSlider.endInclusive, // Maksimum oy ortalaması
                                     "${releaseYearSlider.start.toInt()}-01-01", // En erken çıkış tarihi
                                     "${releaseYearSlider.endInclusive.toInt()}-12-31" ,// En geç çıkış tarihi
-                                    selectedLanguage
+                                    selectedLanguage,voteCountSlider.toInt()
                                 )
 
 

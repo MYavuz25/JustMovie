@@ -10,6 +10,6 @@ interface MovieRepository {
     suspend fun getFilteredMovies(genreId:Int) : MovieListDto
     suspend fun getTrendDayMovie():MovieListDto
     suspend fun getSearchingMovies(search:String) : MovieListDto
-    suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String
+    suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String,voteCount:Int
     ):MovieListDto
 }

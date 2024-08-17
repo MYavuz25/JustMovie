@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class GetFilteredMoviesUseCase @Inject constructor(private val repository: MovieRepository)  {
-    fun getFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String
+    fun getFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String,voteCount:Int
     ) : Flow<Resource<List<Movies>>> = flow{
         try {
             emit(Resource.Loading())
-            val movies=repository.getApplyFilteredMovies(sortBy, genreIds, minVote, maxVote, releaseDateGte, releaseDatelte,originalLanguage)
+            val movies=repository.getApplyFilteredMovies(sortBy, genreIds, minVote, maxVote, releaseDateGte, releaseDatelte,originalLanguage,voteCount)
             if (movies.total_results!=0){
                 emit(Resource.Success(movies.getmovies()))
             }else{
