@@ -22,7 +22,7 @@ class MovieRepositoryImp @Inject constructor(private val api: MovieApi): MovieRe
         return api.getNowPlayingMovies(API_KEY,language)
     }
 
-    override suspend fun getFilteredMovies(genreId:Int): MovieListDto {
+    override suspend fun getFilteredMovies(genreId:String): MovieListDto {
         return api.getFilteredMovies(API_KEY,language,genreId)
     }
 
@@ -33,8 +33,12 @@ class MovieRepositoryImp @Inject constructor(private val api: MovieApi): MovieRe
     override suspend fun getSearchingMovies(search:String): MovieListDto {
         return api.getSearchedMovies(API_KEY,language, searchString = search)
     }
-    override suspend fun getApplyFilteredMovies(sortBy:String,genreIds: String?,minVote:Float,maxVote:Float,releaseDateGte:String,releaseDatelte:String,originalLanguage:String,voteCount:Int
+    override suspend fun getApplyFilteredMovies(sortBy:String?,genreIds: String?,minVote:Float?,maxVote:Float?,releaseDateGte:String?,releaseDatelte:String?,originalLanguage:String?,includeAdult:Boolean?,voteCount:Int?,page:Int?
     ): MovieListDto {
-        return api.getApplyFilteredMovies(API_KEY,language,genreIds,minVote,maxVote,releaseDateGte,releaseDatelte,sortBy,originalLanguage,voteCount)
+        return api.getApplyFilteredMovies(API_KEY,language,genreIds,minVote,maxVote,releaseDateGte,releaseDatelte,sortBy,originalLanguage,includeAdult,voteCount,page)
+    }
+
+    override suspend fun getSimilarMovies(movieId: Int): MovieListDto {
+        return api.getSimilarMovies(movieId, API_KEY)
     }
 }

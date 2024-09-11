@@ -35,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -60,7 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.movieapp1.domain.model.Movies
-import com.example.movieapp1.presentation.popular_movies.view.MovieListRow
+import com.example.movieapp1.presentation.home_screen.view.MovieListRow
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.launch
 
@@ -139,29 +140,37 @@ fun SearchScreen(
     )
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
     var selectedLanguage by remember { mutableStateOf(languageMap.getValue("Türkçe")) }
+    var hint by remember {
+        mutableStateOf("")
+    }
+    state.movies?.let {
+        hint="Star Wars"
+    }
 
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(paddingValues)
         .background(Color.Black)) {
         Column {
+            Spacer(modifier = Modifier.height(16.dp))
             Row{
                 MovieSearchBar(
-                    hint = "Star Wars",
+                    hint = hint,
                     onSearch = {
                         viewModel.onEvent(SearchScreenEvent.Search(it))
+                        hint=it
                     },
                     onFilterClick = {
                         showBottomSheet=true
                     }
-                    )
+                )
             }
+            Spacer(modifier = Modifier.height(8.dp))
 
             MovieSection(
                 title = "arama sonuçları",
                 movies = state.movies,
                 onClick = {
-                    // Tıklama işlemleri
                     navController.navigate("movie_detail_screen/${it.id}")
                 }
             )
@@ -169,7 +178,7 @@ fun SearchScreen(
             Scaffold{ contentPadding ->
                 // Screen content
                 Box(modifier = Modifier.padding(contentPadding)) {
-                    
+
                 }
                 if (showBottomSheet) {
                     ModalBottomSheet(
@@ -190,58 +199,150 @@ fun SearchScreen(
 
                         ) {
 
-                        // Sheet content
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
+                            // Sheet content
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
 
-                        ) {
-                            MyCard(
-                                title = "Genre",
-                                isExpanded = isGenreExpanded,
-                                onExpandChange = { isGenreExpanded = !isGenreExpanded }
                             ) {
-                                FlowRow(
-                                    mainAxisSpacing = 8.dp,
-                                    crossAxisSpacing = 8.dp
+                                MyCard(
+                                    title = "Genre",
+                                    isExpanded = isGenreExpanded,
+                                    onExpandChange = { isGenreExpanded = !isGenreExpanded }
                                 ) {
-                                    genreMap.forEach { genre ->
-                                        FilterChip(
-                                            selected = selectedGenres.contains(genre.value),
-                                            onClick = {
-                                                if (selectedGenres.contains(genre.value)) {
-                                                    selectedGenres.remove(genre.value)
-                                                } else {
-                                                    selectedGenres.add(genre.value)
-                                                }
-                                            },
-                                            label = { Text(genre.key, color = Color.LightGray) }
+                                    FlowRow(
+                                        mainAxisSpacing = 8.dp,
+                                        crossAxisSpacing = 8.dp
+                                    ) {
+                                        genreMap.forEach { genre ->
+                                            FilterChip(
+                                                selected = selectedGenres.contains(genre.value),
+                                                onClick = {
+                                                    if (selectedGenres.contains(genre.value)) {
+                                                        selectedGenres.remove(genre.value)
+                                                    } else {
+                                                        selectedGenres.add(genre.value)
+                                                    }
+                                                },
+                                                label = { Text(genre.key, color = Color.LightGray) }
+                                            )
+                                        }
+                                    }
+                                }
+
+                                MyCard(
+                                    title = "Original Language",
+                                    isExpanded = isLanguageExpanded,
+                                    onExpandChange = { isLanguageExpanded = !isLanguageExpanded }
+                                ) {
+                                    FlowRow(
+                                        mainAxisSpacing = 8.dp,
+                                        crossAxisSpacing = 8.dp
+                                    ) {
+                                        languageMap.forEach { language ->
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable { selectedLanguage = language.value }
+                                                    .padding(vertical = 8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                RadioButton(
+                                                    selected = selectedLanguage == language.value,
+                                                    onClick = { selectedLanguage = language.value },
+                                                    colors = RadioButtonDefaults.colors(
+                                                        selectedColor = Color(
+                                                            0xFFFFC107
+                                                        )
+                                                    )
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(text = language.key, color = Color.White)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                MyCard(
+                                    title = "Release Year",
+                                    isExpanded = isReleaseYearExpanded,
+                                    onExpandChange = { isReleaseYearExpanded = !isReleaseYearExpanded }
+                                ) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "${releaseYearSlider.start.toInt()}",
+                                            color = Color.White
+                                        )
+                                        RangeSlider(
+                                            value = releaseYearSlider,
+                                            onValueChange = { releaseYearSlider = it },
+                                            valueRange = 1900f..2024f,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = Color(0xFFFFC107),
+                                                activeTrackColor = Color(0xFFFFC107)
+                                            ),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Text(
+                                            text = "${releaseYearSlider.endInclusive.toInt()}",
+                                            color = Color.White
                                         )
                                     }
                                 }
-                            }
 
-                            MyCard(
-                                title = "Original Language",
-                                isExpanded = isLanguageExpanded,
-                                onExpandChange = { isLanguageExpanded = !isLanguageExpanded }
-                            ) {
-                                FlowRow(
-                                    mainAxisSpacing = 8.dp,
-                                    crossAxisSpacing = 8.dp
+                                MyCard(
+                                    title = "Vote average",
+                                    isExpanded = isVoteAverageExpanded,
+                                    onExpandChange = { isVoteAverageExpanded = !isVoteAverageExpanded }
                                 ) {
-                                    languageMap.forEach { language ->
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "%.1f".format(voteAverageSlider.start),
+                                            color = Color.White
+                                        )
+                                        RangeSlider(
+                                            value = voteAverageSlider,
+                                            onValueChange = { voteAverageSlider = it },
+                                            valueRange = 0F..10F,
+                                            steps = 100,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = Color(0xFFFFC107),
+                                                activeTrackColor = Color(0xFFFFC107)
+                                            ),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Text(
+                                            text = "%.1f".format(voteAverageSlider.endInclusive),
+                                            color = Color.White
+                                        )
+                                    }
+                                }
+                                MyCard(
+                                    title = "Sort By",
+                                    isExpanded = isSortByExpanded,
+                                    onExpandChange = { isSortByExpanded = !isSortByExpanded }
+                                ) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    sortOptions.forEach { option ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable { selectedLanguage = language.value }
+                                                .clickable { selectedSortOption = option }
                                                 .padding(vertical = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             RadioButton(
-                                                selected = selectedLanguage == language.value,
-                                                onClick = { selectedLanguage = language.value },
+                                                selected = selectedSortOption == option,
+                                                onClick = { selectedSortOption = option },
                                                 colors = RadioButtonDefaults.colors(
                                                     selectedColor = Color(
                                                         0xFFFFC107
@@ -249,178 +350,86 @@ fun SearchScreen(
                                                 )
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text(text = language.key, color = Color.White)
+                                            Text(text = option, color=MaterialTheme.colorScheme.onBackground)
                                         }
                                     }
                                 }
-                            }
-
-                            MyCard(
-                                title = "Release Year",
-                                isExpanded = isReleaseYearExpanded,
-                                onExpandChange = { isReleaseYearExpanded = !isReleaseYearExpanded }
-                            ) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
+                                MyCard(
+                                    title = "Vote Count",
+                                    isExpanded = isVoteCountExpanded,
+                                    onExpandChange = { isVoteCountExpanded = !isVoteCountExpanded }
                                 ) {
-                                    Text(
-                                        text = "${releaseYearSlider.start.toInt()}",
-                                        color = Color.White
-                                    )
-                                    RangeSlider(
-                                        value = releaseYearSlider,
-                                        onValueChange = { releaseYearSlider = it },
-                                        valueRange = 1900f..2024f,
-                                        colors = SliderDefaults.colors(
-                                            thumbColor = Color(0xFFFFC107),
-                                            activeTrackColor = Color(0xFFFFC107)
-                                        ),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Text(
-                                        text = "${releaseYearSlider.endInclusive.toInt()}",
-                                        color = Color.White
-                                    )
-                                }
-                            }
-
-                            MyCard(
-                                title = "Vote average",
-                                isExpanded = isVoteAverageExpanded,
-                                onExpandChange = { isVoteAverageExpanded = !isVoteAverageExpanded }
-                            ) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        text = "%.1f".format(voteAverageSlider.start),
-                                        color = Color.White
-                                    )
-                                    RangeSlider(
-                                        value = voteAverageSlider,
-                                        onValueChange = { voteAverageSlider = it },
-                                        valueRange = 0F..10F,
-                                        steps = 100,
-                                        colors = SliderDefaults.colors(
-                                            thumbColor = Color(0xFFFFC107),
-                                            activeTrackColor = Color(0xFFFFC107)
-                                        ),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Text(
-                                        text = "%.1f".format(voteAverageSlider.endInclusive),
-                                        color = Color.White
-                                    )
-                                }
-                            }
-                            MyCard(
-                                title = "Sort By",
-                                isExpanded = isSortByExpanded,
-                                onExpandChange = { isSortByExpanded = !isSortByExpanded }
-                            ) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                sortOptions.forEach { option ->
+                                    Spacer(modifier = Modifier.height(16.dp))
                                     Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { selectedSortOption = option }
-                                            .padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        RadioButton(
-                                            selected = selectedSortOption == option,
-                                            onClick = { selectedSortOption = option },
-                                            colors = RadioButtonDefaults.colors(
-                                                selectedColor = Color(
-                                                    0xFFFFC107
-                                                )
-                                            )
+                                        Slider(
+                                            value = voteCountSlider,
+                                            onValueChange = { newValue->
+                                                voteCountSlider = newValue },
+                                            valueRange = 0F..1000F,
+                                            steps = 10,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = Color(0xFFFFC107),
+                                                activeTrackColor = Color(0xFFFFC107)
+                                            ),
+                                            modifier = Modifier.weight(1f)
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(text = option, color = Color.White)
+                                        Text(
+                                            text = ("+"+voteCountSlider.toInt()),
+                                            color = MaterialTheme.colorScheme.onBackground
+                                        )
                                     }
                                 }
                             }
-                            MyCard(
-                                title = "Vote Count",
-                                isExpanded = isVoteCountExpanded,
-                                onExpandChange = { isVoteCountExpanded = !isVoteCountExpanded }
+
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Slider(
-                                        value = voteCountSlider,
-                                        onValueChange = { newValue->
-                                            voteCountSlider = newValue },
-                                        valueRange = 0F..1000F,
-                                        steps = 10,
-                                        colors = SliderDefaults.colors(
-                                            thumbColor = Color(0xFFFFC107),
-                                            activeTrackColor = Color(0xFFFFC107)
-                                        ),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Text(
-                                        text = ("+"+voteCountSlider.toInt()),
-                                        color = Color.White
-                                    )
+                                Button(onClick = {
+                                    selectedSortOption=sortOptions[0]
+                                    selectedGenres.clear()
+                                    selectedLanguage= languageMap["Türkçe"] ?:"tr"
+                                    releaseYearSlider = 1900F..2024F
+                                    voteAverageSlider=0F..10F
+                                    voteCountSlider=100F
+                                }) {
+                                    Text("Clear all")
                                 }
-                            }
-                        }
-
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Button(onClick = {
-                                selectedSortOption=sortOptions[0]
-                                selectedGenres.clear()
-                                selectedLanguage= languageMap["Türkçe"] ?:"tr"
-                                releaseYearSlider = 1900F..2024F
-                                voteAverageSlider=0F..10F
-                                voteCountSlider=100F
-                            }) {
-                                Text("Clear all")
-                            }
-                            Button(onClick = {
-                                // Filtreleri uygula
-                                val selectedSort = when (selectedSortOption) {
-                                    "popularity", "release_date", "revenue", "primary_release_date", "vote_average", "vote_count" -> "$selectedSortOption.desc"
-                                    "original_title" -> "original_title.asc" // Alfabetik sıralama için asc kullanmak mantıklı
-                                    else -> selectedSortOption
-                                }
-                                viewModel.getFilteredMovies(
-                                    selectedSort, // Sıralama kriteri (örneğin: "popularity" veya "release_date")
-                                    selectedGenres.joinToString(","), // Türleri virgülle ayırarak String formatında gönder
-                                    voteAverageSlider.start, // Minimum oy ortalaması
-                                    voteAverageSlider.endInclusive, // Maksimum oy ortalaması
-                                    "${releaseYearSlider.start.toInt()}-01-01", // En erken çıkış tarihi
-                                    "${releaseYearSlider.endInclusive.toInt()}-12-31" ,// En geç çıkış tarihi
-                                    selectedLanguage,voteCountSlider.toInt()
-                                )
-
-
-                                scope.launch { sheetState.hide() }.invokeOnCompletion {
-
-                                    if (!sheetState.isVisible) {
-                                        showBottomSheet = false
+                                Button(onClick = {
+                                    // Filtreleri uygula
+                                    val selectedSort = when (selectedSortOption) {
+                                        "popularity", "release_date", "revenue", "primary_release_date", "vote_average", "vote_count" -> "$selectedSortOption.desc"
+                                        "original_title" -> "original_title.asc" // Alfabetik sıralama için asc kullanmak mantıklı
+                                        else -> selectedSortOption
                                     }
+                                    viewModel.getFilteredMovies(
+                                        selectedSort, // Sıralama kriteri (örneğin: "popularity" veya "release_date")
+                                        selectedGenres.joinToString(","), // Türleri virgülle ayırarak String formatında gönder
+                                        voteAverageSlider.start, // Minimum oy ortalaması
+                                        voteAverageSlider.endInclusive, // Maksimum oy ortalaması
+                                        "${releaseYearSlider.start.toInt()}-01-01", // En erken çıkış tarihi
+                                        "${releaseYearSlider.endInclusive.toInt()}-12-31" ,// En geç çıkış tarihi
+                                        selectedLanguage,false,voteCountSlider.toInt(),1
+                                    )
+
+
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+
+                                        if (!sheetState.isVisible) {
+                                            showBottomSheet = false
+                                        }
+                                    }
+                                }) {
+                                    Text("Apply")
                                 }
-                            }) {
-                                Text("Apply")
                             }
                         }
-                     }
                     }
                 }
             }
@@ -439,18 +448,19 @@ fun MyCard(
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth()
-            .background(Color.Black)
-            .border(1.dp, Color(0xFFFFD700)),
+            .background(MaterialTheme.colorScheme.background)
+            .border(1.dp, MaterialTheme.colorScheme.secondary),
         colors = CardDefaults.cardColors(containerColor = Color.Black),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clickable {
-                    isExpandedState = !isExpandedState
-                    onExpandChange()
-                },
+                        isExpandedState = !isExpandedState
+                        onExpandChange()
+                    },
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -482,10 +492,9 @@ fun MovieSection(
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = title,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -501,7 +510,6 @@ fun MovieSection(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieSearchBar(
@@ -557,7 +565,6 @@ fun MovieSearchBar(
                         isHintDisplayed = it.isFocused != true && text.isEmpty()
                     }
             )
-
             if (isHintDisplayed) {
                 Text(
                     text = hint,
@@ -567,12 +574,11 @@ fun MovieSearchBar(
                 )
             }
         }
-
         IconButton(
             onClick = onFilterClick,
             modifier = Modifier.align(Alignment.CenterVertically)
         ) {
-            Icon(imageVector = Icons.Filled.FilterAlt, contentDescription = "Filter")
+            Icon(imageVector = Icons.Filled.FilterAlt, contentDescription = "Filter", tint = MaterialTheme.colorScheme.secondary)
         }
     }
 }

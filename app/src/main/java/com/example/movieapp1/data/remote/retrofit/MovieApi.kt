@@ -36,7 +36,7 @@ interface MovieApi {
     suspend fun getFilteredMovies(
         @Query("api_key") apiKey: String, // API anahtarı
         @Query("language") language: String, // Dil parametresi
-        @Query("with_genres") genreId: Int
+        @Query("with_genres") genreId: String
     ):MovieListDto
 
     //https://api.themoviedb.org/3/trending/movie/day?api_key=API_KEY&language=tr
@@ -60,13 +60,23 @@ interface MovieApi {
         @Query("api_key") apiKey: String, // API anahtarı
         @Query("language") language: String, // Dil parametresi
         @Query("with_genres") genreIds: String?, // Türleri virgülle ayırarak ekleyebilirsiniz (örneğin, "28,12")
-        @Query("vote_average.gte") minVoteAverage: Float, // Minimum oy ortalaması
-        @Query("vote_average.lte") maxVoteAverage: Float,
-        @Query("release_date.gte") releaseDateGte: String, // En erken çıkış tarihi (örneğin, "2022-01-01")
-        @Query("release_date.lte") releaseDateLte: String, // En geç çıkış tarihi (örneğin, "2023-12-31")
-        @Query("sort_by") sortBy: String, // Sıralama parametresi (örneğin, "popularity.desc")
-        @Query("with_original_language") originalLanguage:String,
-        @Query("vote_count.gte") voteCount:Int
+        @Query("vote_average.gte") minVoteAverage: Float?, // Minimum oy ortalaması
+        @Query("vote_average.lte") maxVoteAverage: Float?,
+        @Query("release_date.gte") releaseDateGte: String?, // En erken çıkış tarihi (örneğin, "2022-01-01")
+        @Query("release_date.lte") releaseDateLte: String?, // En geç çıkış tarihi (örneğin, "2023-12-31")
+        @Query("sort_by") sortBy: String?, // Sıralama parametresi (örneğin, "popularity.desc")
+        @Query("with_original_language") originalLanguage:String?,
+        @Query("include_adult") includeAdult: Boolean? = false,
+        @Query("vote_count.gte") voteCount:Int?,
+        @Query("page") page: Int?
     ): MovieListDto
+    //https://api.themoviedb.org/3/movie/{movie_id}/similar?api_key=YOUR_API_KEY
+    @GET("movie/{movie_id}/similar")
+    suspend fun getSimilarMovies(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): MovieListDto
+
+
 
 }

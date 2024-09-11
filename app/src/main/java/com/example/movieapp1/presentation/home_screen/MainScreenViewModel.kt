@@ -1,4 +1,4 @@
-package com.example.movieapp1.presentation.popular_movies
+package com.example.movieapp1.presentation.home_screen
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -27,9 +27,9 @@ class MainScreenViewModel @Inject constructor(
     init {
         getNowPlayingMovies()
         getPopularMovies()
-        getMovieListAccordingToGenre(12)
+        getMovieListAccordingToGenre("12")
         getTrendMovieDay()
-        getMovieListAccordingToGenre(10751)
+        getMovieListAccordingToGenre("10751")
     }
 
     private fun getPopularMovies() {
@@ -68,7 +68,7 @@ class MainScreenViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun getMovieListAccordingToGenre(genreId: Int) {
+    private fun getMovieListAccordingToGenre(genreId: String) {
         getFilteredWithGenreUseCase.getMoviesAccordingToGenre(genreId).onEach {
             when (it) {
                 is Resource.Error -> {
@@ -81,10 +81,10 @@ class MainScreenViewModel @Inject constructor(
 
                 is Resource.Success -> {
                     when(genreId){
-                        10751 ->{
+                        "10751" ->{
                             _state.value = _state.value.copy(movieListAccordingToFamilyGenre = it.data, isLoading = false)
                         }
-                        12 ->{
+                        "12" ->{
                             _state.value = _state.value.copy(movieListAccordingToAdventureGenre = it.data, isLoading = false)
                         }
                     }

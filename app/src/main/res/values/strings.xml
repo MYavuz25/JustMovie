@@ -1,4 +1,8 @@
 <resources>
-    <string name="app_name">MovieAPP1</string>
+    <string name="app_name">Just Movie</string>
     <string name="popular_header">Popüler Filmler</string>
+    <string name="vizyon_header">Vizyondaki Filmler</string>
+    <string name="daily_trend_header">Bugünün Trend Filmleri</string>
+    <string name="kids_header">Çocuk Filmleri</string>
+    <string name="adventure_header">Macera Filmleri</string>
 </resources>

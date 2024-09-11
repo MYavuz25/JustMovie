@@ -1,4 +1,5 @@
 package com.example.movieapp1.presentation
+import ExploreScreen
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,8 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.movieapp1.presentation.movie_detail.MovieDetailScreen
-import com.example.movieapp1.presentation.popular_movies.view.ExploreScreen
-import com.example.movieapp1.presentation.popular_movies.view.HomeScreen
+import com.example.movieapp1.presentation.home_screen.view.HomeScreen
 import com.example.movieapp1.presentation.search_screen.SearchScreen
 import com.example.movieapp1.presentation.theme.MovieAPP1Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -89,11 +89,11 @@ fun MainScreen(navController: NavHostController) {
         NavHost(navController, startDestination = BottomNavItem.Home.route) {
             composable(BottomNavItem.Home.route) { HomeScreen(padding,navController) }
             composable(BottomNavItem.Search.route) { SearchScreen(padding,navController) }
-            composable(BottomNavItem.Explore.route) { ExploreScreen(navController) }
+            composable(BottomNavItem.Explore.route) { ExploreScreen(padding,navController) }
             composable("movie_detail_screen/{movieId}") { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getString("movieId")?.toInt()
                 if (movieId != null) {
-                    MovieDetailScreen(movieId = movieId)
+                    MovieDetailScreen(movieId = movieId,navController,padding)
                 }
 
             }

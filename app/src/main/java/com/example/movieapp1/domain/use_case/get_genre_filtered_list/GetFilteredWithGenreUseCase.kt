@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class GetFilteredWithGenreUseCase @Inject constructor(private val repository: MovieRepository) {
-    fun getMoviesAccordingToGenre(genreId:Int) : Flow<Resource<List<Movies>>> = flow{
+    fun getMoviesAccordingToGenre(genreId:String) : Flow<Resource<List<Movies>>> = flow{
         try {
             emit(Resource.Loading())
             val movies=repository.getFilteredMovies(genreId)
