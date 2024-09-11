@@ -2,6 +2,7 @@ package com.example.movieapp1.data.repository
 
 import com.example.movieapp1.data.remote.dto.movie_detail.MovieDetailDTO
 import com.example.movieapp1.data.remote.dto.movie_lists.MovieListDto
+import com.example.movieapp1.data.remote.dto.movie_watch_providers.WatchProvidersResponse
 import com.example.movieapp1.data.remote.retrofit.MovieApi
 import com.example.movieapp1.domain.repository.MovieRepository
 import com.example.movieapp1.util.Constants.API_KEY
@@ -40,5 +41,9 @@ class MovieRepositoryImp @Inject constructor(private val api: MovieApi): MovieRe
 
     override suspend fun getSimilarMovies(movieId: Int): MovieListDto {
         return api.getSimilarMovies(movieId, API_KEY)
+    }
+
+    override suspend fun getWatchProviders(movieId: Int): WatchProvidersResponse {
+        return api.getWatchProviders(movieId, API_KEY)
     }
 }

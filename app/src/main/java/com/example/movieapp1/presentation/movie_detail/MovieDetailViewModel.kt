@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.movieapp1.domain.use_case.get_genre_filtered_list.GetFilteredWithGenreUseCase
 import com.example.movieapp1.domain.use_case.get_movie_detail.GetMovieDetailUseCase
 import com.example.movieapp1.domain.use_case.get_similar_movies.GetSimilarMoviesUseCase
+import com.example.movieapp1.domain.use_case.get_watch_providers.GetWatchProvidersUseCase
 import com.example.movieapp1.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class MovieDetailViewModel @Inject constructor(
     private val getMovieDetailUseCase: GetMovieDetailUseCase,
     private val getSimilarMoviesUseCase: GetSimilarMoviesUseCase,
+    private val getWatchProvidersUseCase: GetWatchProvidersUseCase,
     private val getFilteredWithGenreUseCase: GetFilteredWithGenreUseCase
 ):ViewModel() {
     private val _state= mutableStateOf(MovieDetailState())
@@ -64,8 +66,23 @@ class MovieDetailViewModel @Inject constructor(
                     _state.value = _state.value.copy(isSimilarLoading = true)
                 }
                 is Resource.Success -> {
-                    println(it.data.toString())
                     _state.value = _state.value.copy(genreMovieList = it.data, isSimilarLoading = false)
+                }
+            }
+
+        }.launchIn(viewModelScope)
+    }
+    fun getWatchProviders(movieId: Int){
+        getWatchProvidersUseCase.getWatchProviders(movieId).onEach {
+            when(it){
+                is Resource.Error -> {
+                    _state.value = _state.value.copy(similarError = it.message ?: "ERROR", isSimilarLoading = false)
+                }
+                is Resource.Loading -> {
+                    _state.value = _state.value.copy(isSimilarLoading = true)
+                }
+                is Resource.Success -> {
+                    _state.value = _state.value.copy(watchProviders = it.data, isSimilarLoading = false)
                 }
             }
 

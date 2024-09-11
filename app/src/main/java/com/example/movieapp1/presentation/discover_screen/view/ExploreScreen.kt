@@ -1,5 +1,6 @@
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -243,8 +244,8 @@ fun SwipeableCard(
     val color by remember {
         derivedStateOf {
             when {
-                swipeableState.offset.value < -20 -> Color.Blue
-                swipeableState.offset.value > 20 -> Color.Red
+                swipeableState.offset.value < -20 -> Color(0x8000FF00)
+                swipeableState.offset.value > 20 -> Color(0x80FF0000)
                 else -> Color(0xFF000000)// Default color when in the center
             }
         }
@@ -262,6 +263,7 @@ fun SwipeableCard(
             )
             .offset { IntOffset(swipeableState.offset.value.roundToInt(), 0) }
             .graphicsLayer(rotationZ = swipeableState.offset.value * 0.05f) // Adjust rotation if needed
+            .border(1.dp,MaterialTheme.colorScheme.secondary, shape =RoundedCornerShape(16.dp) )
             .background(
                 color = color,
                 shape = RoundedCornerShape(16.dp)

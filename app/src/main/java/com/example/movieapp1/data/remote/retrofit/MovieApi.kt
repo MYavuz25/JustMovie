@@ -2,6 +2,7 @@ package com.example.movieapp1.data.remote.retrofit
 
 import com.example.movieapp1.data.remote.dto.movie_detail.MovieDetailDTO
 import com.example.movieapp1.data.remote.dto.movie_lists.MovieListDto
+import com.example.movieapp1.data.remote.dto.movie_watch_providers.WatchProvidersResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -76,6 +77,12 @@ interface MovieApi {
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
     ): MovieListDto
+    //https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key=YOUR_API_KEY
+    @GET("movie/{movie_id}/watch/providers")
+    suspend fun getWatchProviders(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): WatchProvidersResponse
 
 
 

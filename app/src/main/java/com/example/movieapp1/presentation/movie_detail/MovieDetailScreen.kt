@@ -36,6 +36,7 @@ import androidx.wear.compose.material.OutlinedButton
 import coil.compose.SubcomposeAsyncImage
 import com.example.movieapp1.domain.model.Movies
 import com.example.movieapp1.presentation.home_screen.view.MovieListRow
+import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +102,22 @@ fun MovieDetailScreen(
                         }
                     }
                     Text(
+                        text = it.title,
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(8.dp).align(Alignment.Start),
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = it.original_title,
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 8.dp).align(Alignment.Start),
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
                         text = it.overview,
                         color = Color.White,
                         fontSize = 14.sp,
@@ -135,7 +152,7 @@ fun MovieDetailScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(color = Color.DarkGray)
+                            .background(color = Color(0x55000000))
                             .align(Alignment.Start)
                             .padding(2.dp)
                     ) {
@@ -211,6 +228,36 @@ fun MovieDetailScreen(
                         }
 
                     }
+                    LaunchedEffect(movieId) {
+                        movieDetailViewModel.getWatchProviders(movieId)
+                    }
+                    val userCountry=Locale.getDefault().country
+                    state.watchProviders?.results?.get(userCountry)?.let{
+                        Text(text = "Bu film şu platformlarda izlenebilir:")
+                        it.flatrate?.forEach{provider->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Text(
+                                    text = provider.provider_name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                
+                                SubcomposeAsyncImage(
+                                    model = "https://image.tmdb.org/t/p/w500/${provider.logo_path}",
+                                    contentDescription = provider.provider_name,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                        }
+
+
+                    }
+
+
                     if (state.similarMoviesList?.isNotEmpty() == true){
                         MovieSection(title = "Benzerler Filmler",
                             movies =state.similarMoviesList ,
@@ -228,19 +275,16 @@ fun MovieDetailScreen(
                                 movieDetailViewModel.getFilteredWithGenre(genresString)
                             }
                             state.genreMovieList?.let {
-                                MovieSection(title = "Benzerler Filmler", movies =it ) {
-                                    navController.navigate("movie_detail_screen/${it.id}")
+                                MovieSection(title = "Benzerler Filmler", movies =it ) {movie->
+                                    navController.navigate("movie_detail_screen/${movie.id}")
                                 }
                             }
                         }
-
-
-
                     }
+
                 }
             }
             if (state.error.isNotBlank()) {
-                println(state.error)
                 Text(
                     text = state.error,
                     color = MaterialTheme.colorScheme.error,
