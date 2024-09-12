@@ -25,7 +25,6 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import com.example.movieapp1.presentation.discover_screen.Question
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.OutlinedButton
@@ -141,13 +140,13 @@ fun ExploreScreen(
 
         state.movies?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Keşfedilen Filmler")
+            Text(text = "Keşfedilen Filmler", color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(8.dp))
             MovieSection(
                 title = "",
                 movies = it,
-                onClick = {
-                    navController.navigate("movie_detail_screen/${it.id}")
+                onClick = {movie->
+                    navController.navigate("movie_detail_screen/${movie.id}")
                 }
             )
         }
@@ -170,9 +169,7 @@ fun ExploreScreen(
                 if (currentIndex.intValue <=questions.size-1) {
                     answers[currentIndex.intValue] = currentQuestion.value.answer1
                     if (currentIndex.intValue == (questions.size - 1)) {
-                        answers.toList().let {
-                            applyFilters(answers.toList())
-                        }
+                        applyFilters(answers.toList())
                     } else {
                         currentIndex.intValue += 1
                     }
@@ -182,9 +179,7 @@ fun ExploreScreen(
                 if (currentIndex.intValue <= questions.size-1 ) {
                     answers[currentIndex.intValue] = currentQuestion.value.answer2
                     if (currentIndex.intValue == questions.size - 1) {
-                        answers.toList().let {
-                            applyFilters(answers.toList())
-                        }
+                        applyFilters(answers.toList())
 
                     } else {
                         currentIndex.intValue += 1
@@ -213,31 +208,20 @@ fun SwipeableCard(
 ) {
     val swipeableState = rememberSwipeableState(initialValue = 0)
     val anchors = mapOf(-300f to -1, 0f to 0, 300f to 1)
-    val coroutineScope = rememberCoroutineScope()
     var offsetX by remember { mutableFloatStateOf(0f) }
-    val swipeThreshold = 20.dp // Threshold for swiping
-
-    // Track the offset to decide swipe action
-    LaunchedEffect(swipeableState.offset.value) {
-        val offset = swipeableState.offset.value
-        if (offset > 300) {
-            coroutineScope.launch {
-                swipeableState.snapTo(targetValue = 0)
-            }
-        } else if (offset < -300) {
-            coroutineScope.launch {
-                swipeableState.snapTo(targetValue = 0)
-            }
+    val swipeThreshold = 20.dp
+    LaunchedEffect(swipeableState.isAnimationRunning) {
+        if (!swipeableState.isAnimationRunning) {
+            swipeableState.animateTo(0) // Kartı başlangıç pozisyonuna geri al
         }
     }
 
-    // Derive text and color based on swipe offset
     val chooseText by remember(question, swipeableState.offset.value) {
         derivedStateOf {
             when {
                 swipeableState.offset.value < -20 -> question.answer1
                 swipeableState.offset.value > 20 -> question.answer2
-                else -> "" // Default text when in the center
+                else -> ""
             }
         }
     }
@@ -263,7 +247,7 @@ fun SwipeableCard(
             )
             .offset { IntOffset(swipeableState.offset.value.roundToInt(), 0) }
             .graphicsLayer(rotationZ = swipeableState.offset.value * 0.05f) // Adjust rotation if needed
-            .border(1.dp,MaterialTheme.colorScheme.secondary, shape =RoundedCornerShape(16.dp) )
+            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
             .background(
                 color = color,
                 shape = RoundedCornerShape(16.dp)
@@ -298,6 +282,8 @@ fun SwipeableCard(
                                 }
 
                                 // Reset position
+
+
                                 offsetX = 0f
                                 initialOffsetX = 0f
                                 dragOffsetX = 0f

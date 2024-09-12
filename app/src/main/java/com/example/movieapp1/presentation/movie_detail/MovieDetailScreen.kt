@@ -103,7 +103,7 @@ fun MovieDetailScreen(
                     }
                     Text(
                         text = it.title,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp).align(Alignment.Start),
@@ -111,7 +111,7 @@ fun MovieDetailScreen(
                     )
                     Text(
                         text = it.original_title,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(start = 8.dp).align(Alignment.Start),
@@ -119,10 +119,10 @@ fun MovieDetailScreen(
                     )
                     Text(
                         text = it.overview,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(8.dp),
-                        maxLines = if (!isExpanded) 5 else it.overview.length,
+                        maxLines = if (!isExpanded) 5 else if (it.overview.isNotBlank()) it.overview.length else 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
@@ -158,7 +158,7 @@ fun MovieDetailScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
 
-                            Text(text = "Filmin Türü: ", modifier = Modifier.width(100.dp))
+                            Text(text = "Filmin Türü: ", modifier = Modifier.width(100.dp), color = MaterialTheme.colorScheme.onBackground)
                             FlowRow {
                                 it.genres.forEach {
                                     FilterChip(
@@ -178,7 +178,43 @@ fun MovieDetailScreen(
                             horizontalArrangement = Arrangement.Start
                         ) {
 
-                            Text(text = "Yapımcı Ülke: ", modifier = Modifier.width(100.dp))
+                            Text(text = "Süre: ", modifier = Modifier.width(100.dp) ,color = MaterialTheme.colorScheme.onBackground)
+                            FilterChip(
+                                selected = false,
+                                onClick = { },
+                                label = {
+                                    Text(
+                                        it.runtime.toString() + " dk",
+                                        color = Color.LightGray
+                                    )
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+
+                            Text(text = "Yayın Tarihi: ", modifier = Modifier.width(100.dp) ,color = MaterialTheme.colorScheme.onBackground)
+                            FilterChip(
+                                selected = false,
+                                onClick = { },
+                                label = {
+                                    Text(
+                                        it.release_date.take(4) ,
+                                        color = Color.LightGray
+                                    )
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+
+                            Text(text = "Yapımcı Ülke: ", modifier = Modifier.width(100.dp), color = MaterialTheme.colorScheme.onBackground)
                             FlowRow {
                                 it.production_countries.forEach{
                                     FilterChip(
@@ -196,7 +232,7 @@ fun MovieDetailScreen(
                             horizontalArrangement = Arrangement.Start
                         ) {
 
-                            Text(text = "Orjinal Dili: ", modifier = Modifier.width(100.dp))
+                            Text(text = "Orjinal Dili: ", modifier = Modifier.width(100.dp), color = MaterialTheme.colorScheme.onBackground)
                             FlowRow {
                                 it.original_language?.let {
                                     FilterChip(
@@ -208,32 +244,15 @@ fun MovieDetailScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-
-                            Text(text = "Süre: ", modifier = Modifier.width(100.dp))
-                            FilterChip(
-                                selected = false,
-                                onClick = { },
-                                label = {
-                                    Text(
-                                        it.runtime.toString() + " dk",
-                                        color = Color.LightGray
-                                    )
-                                }
-                            )
-                        }
 
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                     LaunchedEffect(movieId) {
                         movieDetailViewModel.getWatchProviders(movieId)
                     }
                     val userCountry=Locale.getDefault().country
                     state.watchProviders?.results?.get(userCountry)?.let{
-                        Text(text = "Bu film şu platformlarda izlenebilir:")
+                        Text(text = "Bu film şu platformlarda izlenebilir:", color = MaterialTheme.colorScheme.onBackground)
                         it.flatrate?.forEach{provider->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -253,13 +272,11 @@ fun MovieDetailScreen(
                                 )
                             }
                         }
-
-
                     }
-
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     if (state.similarMoviesList?.isNotEmpty() == true){
-                        MovieSection(title = "Benzerler Filmler",
+                        MovieSection(title = "Benzer Filmler",
                             movies =state.similarMoviesList ,
                             onClick = {
                                 navController.navigate("movie_detail_screen/${it.id}")
@@ -275,12 +292,13 @@ fun MovieDetailScreen(
                                 movieDetailViewModel.getFilteredWithGenre(genresString)
                             }
                             state.genreMovieList?.let {
-                                MovieSection(title = "Benzerler Filmler", movies =it ) {movie->
+                                MovieSection(title = "Benzer Filmler", movies =it ) {movie->
                                     navController.navigate("movie_detail_screen/${movie.id}")
                                 }
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
                 }
             }

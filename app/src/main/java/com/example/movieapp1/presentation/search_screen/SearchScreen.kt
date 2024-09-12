@@ -399,7 +399,7 @@ fun SearchScreen(
                                     voteAverageSlider=0F..10F
                                     voteCountSlider=100F
                                 }) {
-                                    Text("Clear all")
+                                    Text("Clear all", color = MaterialTheme.colorScheme.onBackground)
                                 }
                                 Button(onClick = {
                                     // Filtreleri uygula
@@ -426,7 +426,7 @@ fun SearchScreen(
                                         }
                                     }
                                 }) {
-                                    Text("Apply")
+                                    Text(text = "Apply", color = MaterialTheme.colorScheme.onBackground)
                                 }
                             }
                         }
